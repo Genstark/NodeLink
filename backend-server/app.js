@@ -46,6 +46,20 @@ io.on('connection', (socket) => {
         io.to(connections[0]).emit('replyback', JSON.stringify({ message: Math.floor(Math.random() * 10000000) }));
     });
 
+    socket.on('send_to_user', (data) => {
+        const targetUser = connections.find((conn) => conn.username === data.targetUsername);
+
+        if (targetUser) {
+            io.to(targetUser.socketId).emit('receive_message', {
+                sender: data.senderUsername,
+                message: data.message
+            });
+            console.log(`Message sent to ${data.targetUsername}`);
+        } else {
+            console.log(`User ${data.targetUsername} not found.`);
+        }
+    });
+
     socket.on('disconnect', () => {
         console.log('User disconnected', socket.id);
         const findindex = connections.findIndex((conn) => conn.id === socket.id);

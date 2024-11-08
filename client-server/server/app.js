@@ -8,6 +8,14 @@ socket.on('connect', () => {
     console.log('Connected to server', socket.id);
 });
 
+socket.on('user_info', (data) => {
+    console.log(data);
+});
+
+socket.on('sendata', (data) => {
+    console.log(data);
+});
+
 // Event handler for incoming messages
 socket.on('message', (data) => {
     console.log('Message from server:', data);
