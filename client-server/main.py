@@ -44,7 +44,7 @@ def disconnect():
             break
 
 def connect_to_server():
-    sio.connect('https://nodelink-1.onrender.com')
+    sio.connect('http://localhost:3000')
 
 check = ''
 
