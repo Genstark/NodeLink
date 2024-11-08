@@ -44,7 +44,19 @@ def disconnect():
             break
 
 def connect_to_server():
-    sio.connect('https://nodelink-1.onrender.com')
+    sio.connect('http://localhost:3000')
+
+
+def send_to_specific_user(target_socket_id, message_data):
+    sio.emit('message', message_data, room=target_socket_id)
+    print(f"Message sent to user with socket ID: {target_socket_id}")
+
+def send_image_to_user(target_socket_id, image_path):
+    with open(image_path, 'rb') as img_file:
+        image_data = img_file.read()
+    sio.emit('send_image', image_data, room=target_socket_id)
+    print(f"Image sent to user with socket ID: {target_socket_id}")
+
 
 check = ''
 
