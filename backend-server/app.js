@@ -9,10 +9,9 @@ const io = socketIo(server);
 
 // app.use(express.static('public'));
 
-
-// app.get('/', (req, res) => {
-//     res.sendFile(__dirname + '/public/index.html');
-// });
+app.get('/', (req, res) => {
+    res.status(200).send();
+});
 
 let connections = [];
 
@@ -23,8 +22,8 @@ io.on('connection', (socket) => {
 
     socket.on('user_info', (data) => {
         const userObject = {
-            username: data.username,
-            socketId: socket.id,
+            username: data.username, 
+            socketId: socket.id
         };
         connections.push(userObject);
         console.table(connections);
