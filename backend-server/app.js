@@ -1,17 +1,25 @@
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
 
-// app.use(express.static('public'));
+app.use(express.static(path.resolve(__dirname, 'public'), { 'extensions': ['html', 'js', 'css'] }));
 
 app.get('/', (req, res) => {
-    res.status(200).send();
+    res.status(200).sendFile(path.resolve(__dirname, 'public', 'index.html'));
 });
+
+function base64_encode(file) {
+    var bitmap = fs.readFileSync(file);
+    return Buffer.from(bitmap).toString('base64');
+}
+const img = base64_encode('./public/resource/Arc_Reactor_baseColor.png');
 
 let connections = [];
 
@@ -45,6 +53,10 @@ io.on('connection', (socket) => {
         io.to(connections[0]).emit('replyback', JSON.stringify({ message: Math.floor(Math.random() * 10000000) }));
     });
 
+    socket.on('image', (data) => {
+        console.log(data);
+    });
+
     socket.on('send_to_user', (data) => {
         const targetUser = connections.find((conn) => conn.username === data.targetUsername);
 
@@ -63,7 +75,7 @@ io.on('connection', (socket) => {
         console.log('User disconnected', socket.id);
         const findindex = connections.findIndex((conn) => conn.id === socket.id);
         connections.splice(findindex, 1);
-        console.table(connections);
+        // console.table(connections);
     });
 });
 
