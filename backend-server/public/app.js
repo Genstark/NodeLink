@@ -23,6 +23,7 @@ nextBtn.addEventListener('click', (event) => {
 });
 
 let imagedata;
+let filename;
 imageInput.addEventListener("change", (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -30,6 +31,7 @@ imageInput.addEventListener("change", (event) => {
         reader.onload = function (e) {
             imagePreview.src = e.target.result;
             imagedata = e.target.result;
+            filename = file.name;
             imagePreview.style.display = "block";
             uploadBtn.disabled = false;
         };
@@ -42,6 +44,7 @@ uploadBtn.addEventListener('click', (event) => {
     event.preventDefault();
     const data = JSON.parse(sessionStorage.getItem('userdata'));
     data['image'] = imagedata;
+    data['filename'] = filename;
     console.log(data);
     socket.emit('file-upload', data);
     console.log('data is sent to server');

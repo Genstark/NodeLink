@@ -21,7 +21,7 @@ function base64_encode(file) {
     var bitmap = fs.readFileSync(file);
     return Buffer.from(bitmap).toString('base64');
 }
-const img = base64_encode('./public/resource/Arc_Reactor_baseColor.png');
+// const img = base64_encode('./public/resource/Arc_Reactor_baseColor.png');
 
 let connections = [];
 
@@ -56,9 +56,20 @@ io.on('connection', (socket) => {
     });
 
     socket.on('file-upload', async (data) => {
-        console.log(data);
-        await io.to(connections[0].socketId).emit('imageReceive', {image: data.image});
-        await io.to(data.socketid).emit('receive-file', { msg: 'well done' });
+        if (connections.length > 0) {
+            try {
+                console.log(data);
+                await io.to(connections[0].socketId).emit('imageReceive', { image: data.image });
+                await io.to(data.socketid).emit('receive-file', { msg: 'data is received' });
+                console.log('task complete');
+            }
+            catch (error) {
+                console.lof(error);
+            }
+        }
+        else {
+            console.log('no connections');
+        }
     });
 
     socket.on('imageResponse', (data) => {

@@ -3,10 +3,13 @@ import time
 import random
 import json
 import os
+import base64
 
 sio = socketio.Client()
 
 connections = []
+
+file_data = b''
 
 try:
     @sio.event
@@ -39,15 +42,37 @@ try:
     
     @sio.event
     def imageReceive(data):
-        print(data)
-        sio.emit('imageResponse', {"response": "image is received"})
+        global file_data
+        try:
+            if 'image' in data:
+                file_data = data['image']
+                if file_data.startswith('data:image'):
+                    file_data = file_data.split(',')[1]
+
+                image_data = base64.b64decode(file_data)
+
+                filename = 'received_image.jpg'
+                
+                with open(filename, 'wb') as f:
+                    f.write(image_data)
+                
+                print(f"File received and saved as {filename}")
+
+                file_data = b''
+
+                sio.emit('imageResponse', {"response": "image is received"})
+                print(f"Image is received, total size: {len(image_data)} bytes")
+        except:
+            print("Error in receiving image")
 
     @sio.event
     def disconnect():
         print('Disconnected from server')
-        for value, index in connections:
-            if value['socketid'] == sio.sid:
-                connections.remove(index)
+        global connections
+        for value in connections:
+            if isinstance(value, dict) and value.get('socketid') == sio.sid:
+                connections.remove(value)
+                print(f"Connection {sio.sid} removed from the list.")
                 break
 
     def connect_to_server():
