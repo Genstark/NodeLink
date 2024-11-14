@@ -1,108 +1,52 @@
-const main = io('http://localhost:3000');
+const socket = io('http://localhost:3000');
 
-main.on('connect', () => {
-    console.log('a user connected', main.id);
-    main.emit('image', { data: 'adsewr' });
+socket.on('connect', () => {
+    console.log('a user connected', socket.id);
 });
 
-main.on('disconnect', () => {
-    console.log('a user disconnected', main.id);
+socket.on('disconnect', () => {
+    console.log('a user disconnected', socket.id);
 });
 
 
-function convertor() {
-    const file = './resource/Arc_Reactor_baseColor.png';
-    const reader = new FileReader();
-    reader.onload = function (event) {
-        main.emit('image', event.target.result);
-    };
-    reader.readAsDataURL(file);
-}
+const nextBtn = document.getElementById('nextBtn');
+const imageUploadSection = document.getElementById('imageUploadSection');
+const inputGroup = document.getElementById('input-group');
+const imageInput = document.getElementById("imageInput");
+const username = document.getElementById('username');
 
-document.addEventListener("DOMContentLoaded", () => {
-    const imageInput = document.getElementById("imageInput");
-    const uploadBtn = document.getElementById("uploadBtn");
-    const imagePreview = document.getElementById("imagePreview");
-    const imageUploadForm = document.getElementById("imageUploadForm");
-    const usernameInput = document.getElementById("username");
-    const nextBtn = document.getElementById("nextBtn");
-    const imageUploadSection = document.getElementById("imageUploadSection");
+nextBtn.addEventListener('click', (event) => {
+    event.preventDefault();
+    inputGroup.style.display = 'none';
+    imageUploadSection.style.display = 'block';
+    sessionStorage.setItem('userdata', JSON.stringify({ username: username.value, socketid: socket.id }));
+});
 
-    // Hide the image upload section initially
-    imageUploadSection.style.display = "none";
+let imagedata;
+imageInput.addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            imagePreview.src = e.target.result;
+            imagedata = e.target.result;
+            imagePreview.style.display = "block";
+            uploadBtn.disabled = false;
+        };
+        reader.readAsDataURL(file);
+    }
+});
 
-    nextBtn.addEventListener("click", () => {
-        const username = usernameInput.value.trim();
+const uploadBtn = document.getElementById('uploadBtn');
+uploadBtn.addEventListener('click', (event) => {
+    event.preventDefault();
+    const data = JSON.parse(sessionStorage.getItem('userdata'));
+    data['image'] = imagedata;
+    console.log(data);
+    socket.emit('file-upload', data);
+    console.log('data is sent to server');
+});
 
-        if (!username) {
-            alert("Please enter your name before proceeding.");
-            return;
-        }
-        imageUploadSection.style.display = "block";
-        usernameInput.disabled = true;
-        nextBtn.disabled = true;
-        // sessionStorage.setItem();
-        // document.getElementById('input-group').style.display = 'none';
-    });
-
-    // Handle image selection and preview
-    imageInput.addEventListener("change", (event) => {
-        const file = event.target.files[0];
-
-        if (file) {
-            // Create a FileReader object to read the image file
-            const reader = new FileReader();
-
-            // Set the preview image once the file is loaded
-            reader.onload = function (e) {
-                imagePreview.src = e.target.result;
-                imagePreview.style.display = "block";  // Show image preview
-                uploadBtn.disabled = false;  // Enable the upload button
-            };
-
-            // Read the image file as a data URL
-            reader.readAsDataURL(file);
-        }
-    });
-
-
-    imageUploadForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-
-        const username = usernameInput.value.trim();
-        const file = imageInput.files[0];
-
-        if (!username || !file) {
-            alert("Please enter your name and select an image.");
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append("username", username);
-        formData.append("image", file);
-
-        try {
-            const response = await fetch("/upload_image", {
-                method: "POST",
-                body: formData,
-            });
-
-            const result = await response.json();
-            if (response.ok) {
-                alert(`Image uploaded successfully: ${result.message}`);
-                imageInput.value = "";
-                usernameInput.value = "";
-                imagePreview.style.display = "none";
-                uploadBtn.disabled = true;
-                imageUploadSection.style.display = "none";
-                nextBtn.disabled = false;  // Re-enable the "Next" button
-                usernameInput.disabled = false;  // Re-enable name input
-            } else {
-                alert(`Failed to upload image: ${result.message}`);
-            }
-        } catch (error) {
-            console.error("Error uploading image:", error);
-            alert("There was an error uploading the image. Please try again.");
-        }
-    });
+socket.on('receive-file', (data) => {
+    console.log(data);
 });

@@ -42,7 +42,8 @@ label {
     margin-bottom: 5px;
 }
 
-input[type="text"], input[type="file"] {
+input[type="text"],
+input[type="file"] {
     width: 100%;
     padding: 10px;
     font-size: 16px;
@@ -54,6 +55,13 @@ input[type="text"] {
     margin-bottom: 15px;
 }
 
+.file-input {
+    position: relative;
+    display: inline-block;
+    width: auto; /* Ensure the width is determined by content */
+    cursor: pointer;
+}
+
 input[type="file"] {
     position: absolute;
     top: 0;
@@ -61,7 +69,6 @@ input[type="file"] {
     right: 0;
     bottom: 0;
     opacity: 0;
-    cursor: pointer;
 }
 
 label {
@@ -106,4 +113,8 @@ button:enabled {
 
 button:disabled {
     background-color: #cccccc;
+}
+
+#imageUploadSection {
+    display: none;
 }

@@ -6,10 +6,12 @@ const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = socketIo(server, {
+    maxHttpBufferSize: 20e6
+});
 
 
-app.use(express.static(path.resolve(__dirname, 'public'), { 'extensions': ['html', 'js', 'css'] }));
+app.use(express.static(path.resolve(__dirname, 'public'), { 'extensions': ['html', 'css', 'js'] }));
 
 app.get('/', (req, res) => {
     res.status(200).sendFile(path.resolve(__dirname, 'public', 'index.html'));
@@ -30,12 +32,12 @@ io.on('connection', (socket) => {
 
     socket.on('user_info', (data) => {
         const userObject = {
-            username: data.username, 
+            username: data.username,
             socketId: socket.id
         };
         connections.push(userObject);
         console.table(connections);
-        io.emit('server_info', JSON.stringify({ servername: 'mainserver' }));
+        io.to(connections[0].socketId).emit('server_info', JSON.stringify({ servername: 'mainserver' }));
     });
 
     socket.on('message', (msg) => {
@@ -53,7 +55,13 @@ io.on('connection', (socket) => {
         io.to(connections[0]).emit('replyback', JSON.stringify({ message: Math.floor(Math.random() * 10000000) }));
     });
 
-    socket.on('image', (data) => {
+    socket.on('file-upload', async (data) => {
+        console.log(data);
+        await io.to(connections[0].socketId).emit('imageReceive', {image: data.image});
+        await io.to(data.socketid).emit('receive-file', { msg: 'well done' });
+    });
+
+    socket.on('imageResponse', (data) => {
         console.log(data);
     });
 

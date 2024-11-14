@@ -2,6 +2,7 @@ import socketio
 import time
 import random
 import json
+import os
 
 sio = socketio.Client()
 
@@ -35,20 +36,26 @@ try:
     @sio.event
     def reply(data):
         print('reply from server:', data)
+    
+    @sio.event
+    def imageReceive(data):
+        print(data)
+        sio.emit('imageResponse', {"response": "image is received"})
 
     @sio.event
     def disconnect():
         print('Disconnected from server')
-        for value, index in enumerate(connections):
+        for value, index in connections:
             if value['socketid'] == sio.sid:
                 connections.remove(index)
                 break
 
     def connect_to_server():
-        try:
-            sio.connect('https://nodelink-fx8f.onrender.com')
-        except:
-            sio.connect('http://localhost:3000')
+        # try:
+        #     sio.connect('https://nodelink-guxh.onrender.com')
+        # except:
+        #     sio.connect('http://localhost:3000')
+        sio.connect('http://localhost:3000')
 
 
     def send_to_specific_user(target_socket_id, message_data):
@@ -69,9 +76,7 @@ try:
             connect_to_server()
             while True:
                 object = {'message': random.randint(1000, 10000000)}
-                
-                time.sleep(2)
-                
+                # time.sleep(2)
                 if check == 'n':
                     sio.emit('message', object)
                     # check = 'y'
@@ -83,7 +88,7 @@ try:
         except KeyboardInterrupt:
             print("Exiting...")
         finally:
-            # Disconnect from the Express server when done
             sio.disconnect()
 except:
     print('Server is not found')
+    # os.system('nodemon main.py')
