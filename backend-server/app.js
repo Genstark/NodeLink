@@ -58,13 +58,14 @@ io.on('connection', (socket) => {
     socket.on('file-upload', async (data) => {
         if (connections.length > 0) {
             try {
-                console.log(data);
-                await io.to(connections[0].socketId).emit('imageReceive', { image: data.image });
+                const buffer = Buffer.from(data.image.image)
+                console.log(buffer);
+                await io.to(connections[0].socketId).emit('imageReceive', { image: data });
                 await io.to(data.socketid).emit('receive-file', { msg: 'data is received' });
                 console.log('task complete');
             }
             catch (error) {
-                console.lof(error);
+                console.log(error);
             }
         }
         else {

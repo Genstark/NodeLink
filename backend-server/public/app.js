@@ -29,13 +29,16 @@ imageInput.addEventListener("change", (event) => {
     if (file) {
         const reader = new FileReader();
         reader.onload = function (e) {
-            imagePreview.src = e.target.result;
-            imagedata = e.target.result;
+            const buffer = e.target.result;
+            const imgearray = new Uint8Array(buffer);
+            imagedata = imgearray;
             filename = file.name;
+            const previewURL = URL.createObjectURL(file);
+            imagePreview.src = previewURL;
             imagePreview.style.display = "block";
             uploadBtn.disabled = false;
         };
-        reader.readAsDataURL(file);
+        reader.readAsArrayBuffer(file);
     }
 });
 
