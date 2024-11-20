@@ -56,3 +56,7 @@ uploadBtn.addEventListener('click', (event) => {
 socket.on('receive-file', (data) => {
     console.log(data);
 });
+
+socket.on('AI', (data) => {
+    console.log(data);
+});

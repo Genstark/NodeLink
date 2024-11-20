@@ -58,8 +58,7 @@ io.on('connection', (socket) => {
     socket.on('file-upload', async (data) => {
         if (connections.length > 0) {
             try {
-                const buffer = Buffer.from(data.image.image)
-                console.log(buffer);
+                console.log(data);
                 await io.to(connections[0].socketId).emit('imageReceive', { image: data });
                 await io.to(data.socketid).emit('receive-file', { msg: 'data is received' });
                 console.log('task complete');
@@ -75,6 +74,13 @@ io.on('connection', (socket) => {
 
     socket.on('imageResponse', (data) => {
         console.log(data);
+        if (data.userSocketId) {
+            io.to(data.userSocketId).emit('AI', {
+                message: data.response
+            });
+        } else {
+            console.error("Invalid or non-existing userSocketId:", data.userSocketId);
+        }
     });
 
     socket.on('send_to_user', (data) => {

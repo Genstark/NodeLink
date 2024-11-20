@@ -11,8 +11,6 @@ connections = []
 
 file_data = b''
 
-CHUNK_SIZE = 1024 * 1024  # 1 MB
-
 try:
     @sio.event
     def connect():
@@ -41,32 +39,31 @@ try:
     @sio.event
     def reply(data):
         print('reply from server:', data)
-    
-
-    def send_image_in_chunks(image_path, target_socket_id):
-        with open(image_path, 'rb') as f:
-            file_data = f.read()
-
-        total_size = len(file_data)
-        num_chunks = (total_size // CHUNK_SIZE) + 1
-
-        # Send image in chunks
-        for i in range(num_chunks):
-            chunk = file_data[i * CHUNK_SIZE:(i + 1) * CHUNK_SIZE]
-            sio.emit('send_image_chunk', {
-                'chunk': base64.b64encode(chunk).decode('utf-8'),
-                'chunk_index': i,
-                'total_chunks': num_chunks
-            }, room=target_socket_id)
-            print(f"Sent chunk {i + 1}/{num_chunks}")
-        
-        print(f"Total image size: {total_size} bytes")
-
 
     @sio.event
     def imageReceive(data):
-        print(data['image'])
+        print(len(data['image']['image']))
+        print('image is received')
         global file_data
+        
+        try:
+            filename = 'received_image.png'
+
+            with open(filename, 'wb') as f:
+                f.write(data['image']['image'])
+
+            print(f"Image saved as {filename}")
+            
+            with open(filename, 'rb') as f:
+                # Read the image as a binary buffer
+                saved_image_data = f.read()
+            
+            sio.emit('imageResponse', {"response": saved_image_data, 'userSocketId': data['image']['socketid']})
+        
+        except Exception as e:
+            print(f"Error saving image: {e}")
+            sio.emit('imageResponse', {"response": "Error saving image"})
+
         # print('wait')
         # if 'image' in data:
         #     file_data = data['image']
