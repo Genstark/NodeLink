@@ -73,13 +73,18 @@ io.on('connection', (socket) => {
     });
 
     socket.on('imageResponse', (data) => {
-        console.log(data);
-        if (data.userSocketId) {
-            io.to(data.userSocketId).emit('AI', {
-                message: data.response
-            });
-        } else {
-            console.error("Invalid or non-existing userSocketId:", data.userSocketId);
+        try{
+            console.log(data);
+            if (data.userSocketId) {
+                io.to(data.userSocketId).emit('AI', {
+                    message: data.response
+                });
+            } else {
+                console.error("Invalid or non-existing userSocketId:", data.userSocketId);
+            }
+        }
+        catch (error) {
+            console.log(error);
         }
     });
 

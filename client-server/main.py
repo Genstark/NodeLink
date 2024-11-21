@@ -3,17 +3,49 @@ import time
 import random
 import json
 import os
+import asyncio
+import numpy as np
 import base64
 import sys
-
-sys.path.append('./model')
-from model.model import detect_objects_image
+import cv2
+from ultralytics import YOLO
+# from model.model import detect_objects_image
+# sys.path.append('./model')
+# from model.model import detect_objects_image
 
 sio = socketio.Client()
 
 connections = []
 
 file_data = b''
+
+async def process_image(image_data: bytes):
+    # Load image from bytes in memory
+    nparr = np.frombuffer(image_data, np.uint8)
+    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+    if image is None:
+        print("Error: Could not decode image.")
+        return None
+
+    model = YOLO('best.pt')
+    results = model(image)
+
+    for result in results:
+        boxes = result.boxes.xyxy
+        scores = result.boxes.conf
+        class_ids = result.boxes.cls
+        for box, score, class_id in zip(boxes, scores, class_ids):
+            xmin, ymin, xmax, ymax = map(int, box)
+            label = model.names[int(class_id)]  # Get the label of the class
+            print(f'Detected: {label} with confidence: {score:.2f}')
+            cv2.rectangle(image, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
+            cv2.putText(image, f'{label} {score:.2f}', (xmin, ymin - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36, 255, 12), 2)
+
+    _, buffer = cv2.imencode('.png', image)
+    processed_image_data = buffer.tobytes()
+    return processed_image_data
+
 
 try:
     @sio.event
@@ -53,16 +85,17 @@ try:
         try:
             filename = 'received_image.png'
 
-            with open(filename, 'wb') as f:
-                f.write(data['image']['image'])
+            # with open(filename, 'wb') as f:
+            #     f.write(data['image']['image'])
 
             print(f"Image saved as {filename}")
-            print(detect_objects_image(filename))
-            with open(filename, 'rb') as f:
-                # Read the image as a binary buffer
-                saved_image_data = f.read()
+            process = asyncio.run(process_image(data['image']['image']))
+
+            # with open(filename, 'rb') as f:
+            #     saved_image_data = f.read()
             
-            sio.emit('imageResponse', {"response": saved_image_data, 'userSocketId': data['image']['socketid']})
+            sio.emit('imageResponse', {"response": process, 'userSocketId': data['image']['socketid']})
+            print('response sent')
         
         except Exception as e:
             print(f"Error saving image: {e}")
