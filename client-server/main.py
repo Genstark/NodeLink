@@ -4,6 +4,10 @@ import random
 import json
 import os
 import base64
+import sys
+
+sys.path.append('./model')
+from model.model import detect_objects_image
 
 sio = socketio.Client()
 
@@ -53,7 +57,7 @@ try:
                 f.write(data['image']['image'])
 
             print(f"Image saved as {filename}")
-            
+            print(detect_objects_image(filename))
             with open(filename, 'rb') as f:
                 # Read the image as a binary buffer
                 saved_image_data = f.read()
