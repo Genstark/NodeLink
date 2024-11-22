@@ -1,4 +1,4 @@
-const socket = io('http://localhost:3000');
+const socket = io('https://nodelink-guxh.onrender.com');
 
 socket.on('connect', () => {
     console.log('a user connected', socket.id);
