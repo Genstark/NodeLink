@@ -142,6 +142,8 @@ try:
         # except:
         #     sio.connect('http://localhost:3000')
         sio.connect('http://localhost:3000')
+        # sio.connect('https://nodelink-guxh.onrender.com')
+        # sio.wait()
 
 
     def send_to_specific_user(target_socket_id, message_data):
