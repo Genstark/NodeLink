@@ -15,6 +15,8 @@ from ultralytics import YOLO
 
 sio = socketio.Client()
 
+model = YOLO('best.pt')
+
 connections = []
 
 file_data = b''
@@ -23,12 +25,12 @@ async def process_image(image_data: bytes):
     # Load image from bytes in memory
     nparr = np.frombuffer(image_data, np.uint8)
     image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    # image_resized = cv2.resize(image, (640, 640), interpolation=cv2.INTER_LINEAR)
 
     if image is None:
         print("Error: Could not decode image.")
         return None
-
-    model = YOLO('best.pt')
+    
     results = model(image)
 
     for result in results:
