@@ -24,10 +24,11 @@ function base64_encode(file) {
 // const img = base64_encode('./public/resource/Arc_Reactor_baseColor.png');
 
 let connections = [];
+let users = [];
 
 io.on('connection', (socket) => {
     console.log('A user connected', socket.id);
-    // connections.push(socket.id);
+    // users.push(socket.id);
     // console.table(connections);
 
     socket.on('user_info', (data) => {
@@ -40,6 +41,10 @@ io.on('connection', (socket) => {
         io.to(connections[0].socketId).emit('server_info', JSON.stringify({ servername: 'mainserver' }));
     });
 
+    socket.on('number', (data) => {
+        console.log(data);
+    });
+    
     socket.on('message', (msg) => {
         console.log('Message received: ', msg);
         io.emit('message', JSON.stringify({ message: Math.floor(Math.random() * 10000000) }));
@@ -56,12 +61,14 @@ io.on('connection', (socket) => {
     });
 
     socket.on('file-upload', async (data) => {
+        console.log(connections.length);
         if (connections.length > 0) {
             try {
                 console.log(data);
                 await io.to(connections[0].socketId).emit('imageReceive', { image: data });
                 await io.to(data.socketid).emit('receive-file', { msg: 'data is received' });
                 console.log('task complete');
+                console.log('wait...');
             }
             catch (error) {
                 console.log(error);
@@ -79,7 +86,9 @@ io.on('connection', (socket) => {
                 io.to(data.userSocketId).emit('AI', {
                     message: data.response
                 });
-            } else {
+                console.log('send');
+            }
+            else {
                 console.error("Invalid or non-existing userSocketId:", data.userSocketId);
             }
         }
@@ -104,8 +113,13 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
         console.log('User disconnected', socket.id);
-        const findindex = connections.findIndex((conn) => conn.id === socket.id);
-        connections.splice(findindex, 1);
+        const findindex = connections.findIndex((conn) => conn.socketId === socket.id);
+        if (findindex !== -1) {
+            connections.splice(findindex, 1);
+        } 
+        else {
+            console.log('No matching socket ID found for disconnect');
+        }
         // console.table(connections);
     });
 });

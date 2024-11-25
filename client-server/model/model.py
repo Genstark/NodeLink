@@ -2,6 +2,15 @@ import cv2
 import matplotlib.pyplot as plt
 from ultralytics import YOLO
 import os
+import time
+import threading
+
+# Function to list active threads
+def list_threads():
+    print(f"Active threads: {threading.enumerate()}")
+
+# Call the function to list active threads
+list_threads()
 
 def detect_objects_image(imagepath:str):
     model_path = 'best.pt'
@@ -19,8 +28,13 @@ def detect_objects_image(imagepath:str):
     if image is None:
         print('Error: Could not load image at', image_path)
         exit()
-
+    start_time = time.time()
     results = model(image_path)
+    end_time = time.time()
+
+    # Calculate the elapsed time
+    elapsed_time = end_time - start_time
+    print(f"Execution time: {elapsed_time:.4f} seconds")
 
     for result in results:
         boxes = result.boxes.xyxy

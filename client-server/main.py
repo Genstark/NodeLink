@@ -31,7 +31,13 @@ async def process_image(image_data: bytes):
         print("Error: Could not decode image.")
         return None
     
+    start_time = time.time()
     results = model(image)
+    end_time = time.time()
+
+    # Calculate the elapsed time
+    elapsed_time = end_time - start_time
+    print(f"Execution time: {elapsed_time:.4f} seconds")
 
     for result in results:
         boxes = result.boxes.xyxy
