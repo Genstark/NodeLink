@@ -48,7 +48,7 @@ async def process_image(image_data: bytes):
             label = model.names[int(class_id)]  # Get the label of the class
             print(f'Detected: {label} with confidence: {score:.2f}')
             cv2.rectangle(image, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
-            cv2.putText(image, f'{label} {score:.2f}', (xmin, ymin - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36, 255, 12), 2)
+            # cv2.putText(image, f'{label} {score:.2f}', (xmin, ymin - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36, 255, 12), 2)
 
     _, buffer = cv2.imencode('.png', image)
     processed_image_data = buffer.tobytes()

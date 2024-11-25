@@ -120,7 +120,6 @@ io.on('connection', (socket) => {
         else {
             console.log('No matching socket ID found for disconnect');
         }
-        // console.table(connections);
     });
 });
 
