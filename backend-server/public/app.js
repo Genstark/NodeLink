@@ -68,7 +68,8 @@ socket.on('AI', (data) => {
         const imageURL = URL.createObjectURL(blob);
         changeImage.src = imageURL;
         changeImage.style.display = 'block';
-    } else {
+    }
+    else {
         console.log('Invalid data received');
     }
 });
