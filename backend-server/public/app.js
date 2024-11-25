@@ -1,4 +1,5 @@
-const socket = io('https://nodelink-guxh.onrender.com');
+// const socket = io('https://nodelink-guxh.onrender.com');
+const socket = io('http://localhost:3000');
 
 socket.on('connect', () => {
     console.log('a user connected', socket.id);
@@ -46,6 +47,7 @@ imageInput.addEventListener("change", (event) => {
 const uploadBtn = document.getElementById('uploadBtn');
 uploadBtn.addEventListener('click', (event) => {
     event.preventDefault();
+    socket.emit('number', { id: socket.id });
     const data = JSON.parse(sessionStorage.getItem('userdata'));
     data['image'] = imagedata;
     data['filename'] = filename;
@@ -60,4 +62,10 @@ socket.on('receive-file', (data) => {
 
 socket.on('AI', (data) => {
     console.log(data);
+    const imageinput = document.getElementById("imagePreview");
+    const convertimage = new Uint8Array(data.response);
+    const blob = new Blob([convertimage], { type: 'image/jpeg' });
+    const url = URL.createObjectURL(blob);
+    imageinput.src = url;
+    imageinput.style.display = "block";
 });
