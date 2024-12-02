@@ -1,5 +1,9 @@
-const socket = io('https://nodelink-guxh.onrender.com/');
-// const socket = io('http://localhost:3000');
+let term = new Terminal();
+term.open(document.getElementById('terminal'));
+term.write('user->$ ');
+
+// const socket = io('https://nodelink-guxh.onrender.com/');
+const socket = io('http://localhost:3000');
 
 socket.on('connect', () => {
     console.log('a user connected', socket.id);
