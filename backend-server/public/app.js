@@ -1,4 +1,4 @@
-let term = new Terminal();
+let term = new Terminal({ convertEol: true });
 // let input = '??';
 let output = '';
 term.open(document.getElementById('terminal'));
@@ -7,24 +7,22 @@ let input = '';
 
 term.onData((e) => {
     input += e;
+    term.write(e);
+    console.log(input);
 
-    if (input.trim() === '??') {
-        term.write('\n');
-        term.write('$~');
-        input = '';
-    } else if (e === '\r' || e === '\n') {
-        if (input.trim() === 'help') {
-            term.write('\nYou can type `help` to see this message, `exit` to quit the terminal, and `??` to see this prompt again.');
+    if (e === '\r' || e === '\n') {
+        input = input.trim();
+
+        if (input === '') {
             term.write('\n$~');
-        } else if (input.trim() === 'exit') {
-            term.close();
+        } else if (input === 'h') {
+            term.write('\nrun\n$~');
+        } else if (input === 'read') {
+            term.write('\nread\n$~');
         } else {
-            term.write('\nUnknown command: ' + input.trim());
-            term.write('\n$~');
+            term.write(`\n${input}\n$~`);
         }
         input = '';
-    } else {
-        term.write(e);
     }
 });
 
@@ -92,7 +90,7 @@ term.onData((e) => {
 //     }
 // });
 
-term.on('paste', function(data) {
+term.on('paste', function (data) {
     curr_line += data;
     term.write(curr_line);
 });
