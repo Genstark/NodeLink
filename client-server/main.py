@@ -147,8 +147,8 @@ try:
         #     sio.connect('https://nodelink-guxh.onrender.com')
         # except:
         #     sio.connect('http://localhost:3000')
-        sio.connect('http://localhost:3000')
-        # sio.connect('https://nodelink-guxh.onrender.com')
+        # sio.connect('http://localhost:3000')
+        sio.connect('https://nodelink-guxh.onrender.com')
         # sio.wait()
 
 
