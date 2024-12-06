@@ -1,99 +1,100 @@
 let term = new Terminal({ convertEol: true });
 // let input = '??';
 let output = '';
+const functionKeys = [
+    '\x1b[15~',
+    '\x1b[17~',
+    '\x1b[18~',
+    '\x1b[19~',
+    '\x1b[20~',
+    '\x1b[21~',
+    '\x1b[23~',
+    '\x1b[24~'
+];
+const messages = [
+    'F5 key pressed',
+    'F6 key pressed',
+    'F7 key pressed',
+    'F8 key pressed',
+    'F9 key pressed',
+    'F10 key pressed',
+    'F11 key pressed',
+    'F12 key pressed'
+];
+
+const keyMappings = {
+    '\x1bOP': 'F1 key pressed',
+    '\x1bOS': 'F2 key pressed',
+    '\x1bOQ': 'F3 key pressed',
+    '\x1bOR': 'F4 key pressed',
+    '\x1b[15~': 'F5 key pressed',
+    '\x1b[17~': 'F6 key pressed',
+    '\x1b[18~': 'F7 key pressed',
+    '\x1b[19~': 'F8 key pressed',
+    '\x1b[20~': 'F9 key pressed',
+    '\x1b[21~': 'F10 key pressed',
+    '\x1b[23~': 'F11 key pressed',
+    '\x1b[24~': 'F12 key pressed'
+};
+
 term.open(document.getElementById('terminal'));
 term.write('$~');
 let input = '';
 
+
 term.onData((e) => {
-    input += e;
-    term.write(e);
-    console.log(input);
+
+    if (e.startsWith('\x1b')) {
+        if (keyMappings[e]) {
+            term.write(`\n${keyMappings[e]}\n$~`);
+        } 
+        else {
+            term.write(`Unknown escape sequence: ${e}\n$~`);
+        }
+    } 
+    else {
+        console.log('Received:', e);
+    }
 
     if (e === '\r' || e === '\n') {
         input = input.trim();
 
         if (input === '') {
             term.write('\n$~');
-        } else if (input === 'h') {
-            term.write('\nrun\n$~');
-        } else if (input === 'read') {
+        }
+        else if (input === 'h') {
+            term.write('\nhelp\n$~');
+        }
+        else if (input === 'read') {
             term.write('\nread\n$~');
-        } else {
-            term.write(`\n${input}\n$~`);
+        }
+        else {
+            try{
+                term.write(`\n${eval(input)}\n$~`);
+            }
+            catch{
+                term.write(`\n${input}\n$~`);
+            }
         }
         input = '';
     }
+    else if (e === '\b' || e.charCodeAt(0) === 127) {
+        if (input.length > 0) {
+            input = input.slice(0, -1);
+            term.write('\b \b');
+            console.log(term);
+        }
+    }
+    else {
+        input += e;
+        term.write(e);
+    }
 });
 
-// term.prompt = () => {
-//     term.write('\n\r' + curr_line + '\r\n\u001b[32mscm> \u001b[37m');
-// };
-// term.write('Welcome to my Scheme web intepreter!');
-// term.prompt();
 
-// term.on('key', function(key, ev) {
-//     const printable = !ev.altKey && !ev.altGraphKey && !ev.ctrlKey && !ev.metaKey &&
-//         !(ev.keyCode === 37 && term.buffer.cursorX < 6);
-
-//     if (ev.keyCode === 13) { // Enter key
-//         if (curr_line.replace(/^\s+|\s+$/g, '').length != 0) { // Check if string is all whitespace
-//             entries.push(curr_line);
-//             currPos = entries.length - 1;
-//             term.prompt();
-//         } else {
-//             term.write('\n\33[2K\r\u001b[32mscm> \u001b[37m');
-//         }
-//         curr_line = '';
-//     } else if (ev.keyCode === 8) { // Backspace
-//         if (term.buffer.cursorX > 5) {
-//             curr_line = curr_line.slice(0, term.buffer.cursorX - 6) + curr_line.slice(term.buffer.cursorX - 5);
-//             pos = curr_line.length - term.buffer.cursorX + 6;
-//             term.write('\33[2K\r\u001b[32mscm> \u001b[37m' + curr_line);
-//             term.write('\033['.concat(pos.toString()).concat('D')); //term.write('\033[<N>D');
-//             if (term.buffer.cursorX == 5 || term.buffer.cursorX == curr_line.length + 6) {
-//                 term.write('\033[1C')
-//             }
-//         }
-//     } else if (ev.keyCode === 38) { // Up arrow
-//         if (entries.length > 0) {
-//             if (currPos > 0) {
-//                 currPos -= 1;
-//             }
-//             curr_line = entries[currPos];
-//             term.write('\33[2K\r\u001b[32mscm> \u001b[37m' + curr_line);
-//         }
-//     } else if (ev.keyCode === 40) { // Down arrow
-//         currPos += 1;
-//         if (currPos === entries.length || entries.length === 0) {
-//             currPos -= 1;
-//             curr_line = '';
-//             term.write('\33[2K\r\u001b[32mscm> \u001b[37m');
-//         } else {
-//             curr_line = entries[currPos];
-//             term.write('\33[2K\r\u001b[32mscm> \u001b[37m' + curr_line);
-
-//         }
-//     } else if (printable && !(ev.keyCode === 39 && term.buffer.cursorX > curr_line.length + 4)) {
-//         if (ev.keyCode != 37 && ev.keyCode != 39) {
-//             var input = ev.key;
-//             if (ev.keyCode == 9) { // Tab
-//                 input = "    ";
-//             }
-//             pos = curr_line.length - term.buffer.cursorX + 4;
-//             curr_line = [curr_line.slice(0, term.buffer.cursorX - 5), input, curr_line.slice(term.buffer.cursorX - 5)].join('');
-//             term.write('\33[2K\r\u001b[32mscm> \u001b[37m' + curr_line);
-//             term.write('\033['.concat(pos.toString()).concat('D')); //term.write('\033[<N>D');
-//         } else {
-//             term.write(key);
-//         }
-//     }
-// });
-
-term.on('paste', function (data) {
-    curr_line += data;
-    term.write(curr_line);
-});
+function check(x, y) {
+    return x + y;
+}
 
 // const socket = io('https://nodelink-guxh.onrender.com/');
 const socket = io('http://localhost:3000');
