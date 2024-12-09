@@ -41,17 +41,55 @@ term.open(document.getElementById('terminal'));
 term.write('$~');
 let input = '';
 
+let inputlength = 0
+
+term.onCursorMove(() => {
+    const cursor = term.buffer.active.cursor;
+    if (cursor) {
+        console.log(`Cursor Position - Row: ${cursor.y}, Column: ${cursor.x}`);
+    }
+    else{
+        console.log('cursor not find');
+    }
+});
 
 term.onData((e) => {
+
+    if (input.length === 0) {
+        if (e === '\x1b[C' || e === '\x1b[D' || e === '\x1b[A' || e === '\x1b[B') {
+            console.log(`Ignoring ${e} as input is empty.`);
+            inputlength = 0;
+            return;
+        }
+    }
 
     if (e.startsWith('\x1b')) {
         if (keyMappings[e]) {
             term.write(`\n${keyMappings[e]}\n$~`);
-        } 
+            return;
+        }
+        else if (e === '\x1b[C') {
+            inputlength = input.length;
+            if (inputlength > 0) {
+                console.log('right key');
+                // return;
+            }
+        }
+        else if (e === '\x1b[D') {
+            inputlength = input.length;
+            if (inputlength > 0) {
+                inputlength--;
+                console.log(inputlength);
+                // return;
+            }
+        }
+        else if (e === '\x1b[A' || e === '\x1b[B') {
+            return;
+        }
         else {
             term.write(`Unknown escape sequence: ${e}\n$~`);
         }
-    } 
+    }
     else {
         console.log('Received:', e);
     }
@@ -65,36 +103,60 @@ term.onData((e) => {
         else if (input === 'h') {
             term.write('\nhelp\n$~');
         }
-        else if (input === 'read') {
+        else if (input.trim() === 'read') {
             term.write('\nread\n$~');
         }
+        else if (input.trim().split(' ')[0] === 'add') {
+            term.write(`\n${input.split(' ')}\n$~`);
+            check(input);
+        }
         else {
-            try{
+            try {
                 term.write(`\n${eval(input)}\n$~`);
             }
-            catch{
+            catch {
                 term.write(`\n${input}\n$~`);
             }
         }
         input = '';
+        inputlength = 0;
     }
     else if (e === '\b' || e.charCodeAt(0) === 127) {
         if (input.length > 0) {
             input = input.slice(0, -1);
             term.write('\b \b');
-            console.log(term);
         }
     }
     else {
         input += e;
+        inputlength = input.length;
         term.write(e);
     }
 });
 
 
-function check(x, y) {
-    return x + y;
+function check(data) {
+    const arry = data.split(' ');
+    console.log(arry)
+    if (arry[0] === 'add') {
+        arry.shift();
+        const num1 = arry.join(' ');
+        console.log(num1);
+        try {
+            const result = eval(num1);
+            console.log(result);
+        } catch (error) {
+            console.log('Error in evaluating expression:', error.message);
+        }
+    }
 }
+
+//(48-57) = 0-9
+// + = 43
+// - = 45
+// * = 42
+// / = 47
+//(=) = 61
 
 // const socket = io('https://nodelink-guxh.onrender.com/');
 const socket = io('http://localhost:3000');
