@@ -1,32 +1,32 @@
-let term = new Terminal();
-// let input = '??';
-let output = '';
-term.open(document.getElementById('terminal'));
-term.write('$~');
-let input = '';
+// let term = new Terminal();
+// // let input = '??';
+// let output = '';
+// term.open(document.getElementById('terminal'));
+// term.write('$~');
+// let input = '';
 
-term.onData((e) => {
-    input += e;
+// term.onData((e) => {
+//     input += e;
 
-    if (input.trim() === '??') {
-        term.write('\n');
-        term.write('$~');
-        input = '';
-    } else if (e === '\r' || e === '\n') {
-        if (input.trim() === 'help') {
-            term.write('\nYou can type `help` to see this message, `exit` to quit the terminal, and `??` to see this prompt again.');
-            term.write('\n$~');
-        } else if (input.trim() === 'exit') {
-            term.close();
-        } else {
-            term.write('\nUnknown command: ' + input.trim());
-            term.write('\n$~');
-        }
-        input = '';
-    } else {
-        term.write(e);
-    }
-});
+//     if (input.trim() === '??') {
+//         term.write('\n');
+//         term.write('$~');
+//         input = '';
+//     } else if (e === '\r' || e === '\n') {
+//         if (input.trim() === 'help') {
+//             term.write('\nYou can type `help` to see this message, `exit` to quit the terminal, and `??` to see this prompt again.');
+//             term.write('\n$~');
+//         } else if (input.trim() === 'exit') {
+//             term.close();
+//         } else {
+//             term.write('\nUnknown command: ' + input.trim());
+//             term.write('\n$~');
+//         }
+//         input = '';
+//     } else {
+//         term.write(e);
+//     }
+// });
 
 // term.prompt = () => {
 //     term.write('\n\r' + curr_line + '\r\n\u001b[32mscm> \u001b[37m');
