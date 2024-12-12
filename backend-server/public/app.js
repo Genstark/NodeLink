@@ -1,3 +1,6 @@
+// const socket = io('https://nodelink-guxh.onrender.com/');
+const socket = io('http://localhost:3000');
+
 let term = new Terminal({ convertEol: true });
 // let input = '??';
 let output = '';
@@ -45,16 +48,7 @@ term.write('$~');
 let input = '';
 
 let inputlength = 0
-
-// term.onCursorMove(() => {
-//     const cursor = term.buffer.active.cursor;
-//     if (cursor) {
-//         console.log(`Cursor Position - Row: ${cursor.y}, Column: ${cursor.x}`);
-//     }
-//     else{
-//         console.log('cursor not find');
-//     }
-// });
+let cursorX = 0
 
 let lastcommand = 0;
 
@@ -69,33 +63,53 @@ term.onData((e) => {
 
     if (e === '\x1b[A') {
         const checkCommand = userCommands[lastcommand];
+        console.log(lastcommand);
         if (checkCommand) {
             term.write('\x1b[2K\r$~');
+            input = userCommands[lastcommand];
             term.write(`${userCommands[lastcommand]}`);
-            lastcommand++;
+
+            if (lastcommand > 0) {
+                lastcommand--;
+            }
         }
     }
+    else if (e === '\x1b[B') {
+        const checkCommand = userCommands[lastcommand];
+        console.log(lastcommand);
+        if (checkCommand) {
+            term.write('\x1b[2K\r$~');
+            input = userCommands[lastcommand];
+            term.write(`${userCommands[lastcommand]}`);
+
+            if (lastcommand < userCommands.length - 1) {
+                lastcommand++;
+            }
+        }
+    }
+
+
+    if (e === '\x1b[C') {
+        if (cursorX < input.length) {
+            cursorX++;
+            term.write('\x1b[C');
+        }
+        console.log('Right Arrow key pressed');
+        return;
+    }
+    else if (e === '\x1b[D') {
+        if (cursorX > 0) {
+            cursorX--;
+            term.write('\x1b[D');
+        }
+        console.log('Left Arrow key pressed');
+        return;
+    }
+
 
     if (e.startsWith('\x1b')) {
         if (keyMappings[e]) {
             term.write(`\n${keyMappings[e]}\n$~`);
-            return;
-        }
-        else if (e === '\x1b[C') {
-            // inputlength = input.length;
-            // if (inputlength > 0) {
-            //     console.log(input)
-            //     console.log('right key');
-            // }
-            return;
-        }
-        else if (e === '\x1b[D') {
-            // inputlength = input.length;
-            // if (inputlength > 0) {
-            //     console.log(inputlength);
-            //     console.log('left key');
-            //     inputlength--;
-            // }
             return;
         }
         else if (e === '\x1b[A' || e === '\x1b[B') {
@@ -112,7 +126,7 @@ term.onData((e) => {
     if (e === '\r' || e === '\n') {
         input = input.trim();
         userCommands.push(input);
-        lastcommand = 0;
+        lastcommand = userCommands.length - 1;
 
         if (input === '') {
             term.write('\n$~');
@@ -126,6 +140,9 @@ term.onData((e) => {
         else if (input.trim().split(' ')[0] === 'add') {
             term.write(`\n${input.split(' ')}\n$~`);
             check(input);
+        }
+        else if (input.trim() === 'connect') {
+            term.write(`\n${socket.id}\n$~`);
         }
         else {
             try {
@@ -176,7 +193,7 @@ function check(data) {
 //(=) = 61
 
 // const socket = io('https://nodelink-guxh.onrender.com/');
-const socket = io('http://localhost:3000');
+// const socket = io('http://localhost:3000');
 
 socket.on('connect', () => {
     console.log('a user connected', socket.id);
