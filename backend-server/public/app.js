@@ -92,10 +92,10 @@
 //     }
 // });
 
-term.on('paste', function(data) {
-    curr_line += data;
-    term.write(curr_line);
-});
+// term.on('paste', function(data) {
+//     curr_line += data;
+//     term.write(curr_line);
+// });
 
 // const socket = io('https://nodelink-guxh.onrender.com/');
 const socket = io('http://localhost:3000');
