@@ -37,29 +37,42 @@ const keyMappings = {
     '\x1b[24~': 'F12 key pressed'
 };
 
+const commands = [];
+let userCommands = []
+
 term.open(document.getElementById('terminal'));
 term.write('$~');
 let input = '';
 
 let inputlength = 0
 
-term.onCursorMove(() => {
-    const cursor = term.buffer.active.cursor;
-    if (cursor) {
-        console.log(`Cursor Position - Row: ${cursor.y}, Column: ${cursor.x}`);
-    }
-    else{
-        console.log('cursor not find');
-    }
-});
+// term.onCursorMove(() => {
+//     const cursor = term.buffer.active.cursor;
+//     if (cursor) {
+//         console.log(`Cursor Position - Row: ${cursor.y}, Column: ${cursor.x}`);
+//     }
+//     else{
+//         console.log('cursor not find');
+//     }
+// });
+
+let lastcommand = 0;
 
 term.onData((e) => {
 
     if (input.length === 0) {
         if (e === '\x1b[C' || e === '\x1b[D' || e === '\x1b[A' || e === '\x1b[B') {
             console.log(`Ignoring ${e} as input is empty.`);
-            inputlength = 0;
-            return;
+            // return;
+        }
+    }
+
+    if (e === '\x1b[A') {
+        const checkCommand = userCommands[lastcommand];
+        if (checkCommand) {
+            term.write('\x1b[2K\r$~');
+            term.write(`${userCommands[lastcommand]}`);
+            lastcommand++;
         }
     }
 
@@ -69,19 +82,21 @@ term.onData((e) => {
             return;
         }
         else if (e === '\x1b[C') {
-            inputlength = input.length;
-            if (inputlength > 0) {
-                console.log('right key');
-                // return;
-            }
+            // inputlength = input.length;
+            // if (inputlength > 0) {
+            //     console.log(input)
+            //     console.log('right key');
+            // }
+            return;
         }
         else if (e === '\x1b[D') {
-            inputlength = input.length;
-            if (inputlength > 0) {
-                inputlength--;
-                console.log(inputlength);
-                // return;
-            }
+            // inputlength = input.length;
+            // if (inputlength > 0) {
+            //     console.log(inputlength);
+            //     console.log('left key');
+            //     inputlength--;
+            // }
+            return;
         }
         else if (e === '\x1b[A' || e === '\x1b[B') {
             return;
@@ -96,6 +111,8 @@ term.onData((e) => {
 
     if (e === '\r' || e === '\n') {
         input = input.trim();
+        userCommands.push(input);
+        lastcommand = 0;
 
         if (input === '') {
             term.write('\n$~');
