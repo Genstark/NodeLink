@@ -1,9 +1,9 @@
 // const socket = io('https://nodelink-guxh.onrender.com/');
-const socket = io('http://localhost:3000');
+const socket = io('http://localhost:5173');
 
 let term = new Terminal({ convertEol: true });
-// let input = '??';
 let output = '';
+
 const functionKeys = [
     '\x1b[15~',
     '\x1b[17~',
@@ -40,7 +40,7 @@ const keyMappings = {
     '\x1b[24~': 'F12 key pressed'
 };
 
-const commands = [];
+const commands = ['help', 'calc', 'connection', 'clear'];
 let userCommands = []
 
 term.open(document.getElementById('terminal'));
@@ -51,6 +51,7 @@ let inputlength = 0
 let cursorX = 0
 
 let lastcommand = 0;
+let isListenerAdded = false;
 
 term.onData((e) => {
 
@@ -137,12 +138,38 @@ term.onData((e) => {
         else if (input.trim() === 'read') {
             term.write('\nread\n$~');
         }
-        else if (input.trim().split(' ')[0] === 'add') {
-            term.write(`\n${input.split(' ')}\n$~`);
+        else if (input.trim().split(' ')[0] === 'calc') {
+            term.write(`\n${check(input)}\n$~`);
             check(input);
         }
-        else if (input.trim() === 'connect') {
+        else if (input.trim() === 'connection') {
             term.write(`\n${socket.id}\n$~`);
+        }
+        else if (input.trim() === 'ls') {
+            for (let i = 0; i < commands.length; i++) {
+                term.write(`\n--${commands[i]}`);
+            }
+            term.write(`\n$~`);
+        }
+        else if (input.trim() === 'clear') {
+            term.clear();
+            term.write(`\x1b[2K\r$~`);
+        }
+        else if (input.trim().split(' ')[0] === 'send') {
+            toServer(input);
+            term.write(`\ndata sended`);
+
+            if (!isListenerAdded) {
+                socket.on('get', (data) => {
+                    console.log(data);
+                    const items = data.items.data;
+                    for(let i=0; i < items.length; i++){
+                        term.write(`\n${items[i]._id} ${items[i].user_id}`);
+                    }
+                    term.write(`\n$~`);
+                });
+                isListenerAdded = true;
+            }
         }
         else {
             try {
@@ -172,16 +199,27 @@ term.onData((e) => {
 function check(data) {
     const arry = data.split(' ');
     console.log(arry)
-    if (arry[0] === 'add') {
+    if (arry[0] === 'calc') {
         arry.shift();
         const num1 = arry.join(' ');
         console.log(num1);
         try {
             const result = eval(num1);
             console.log(result);
+            return result;
         } catch (error) {
             console.log('Error in evaluating expression:', error.message);
         }
+    }
+}
+
+function toServer(userinput) {
+    const data = userinput.split(' ');
+    if (data[0] === 'send') {
+        data.shift();
+        console.log(data);
+        const message = data.join(' ');
+        socket.emit('term', { message: message, id: socket.id });
     }
 }
 
@@ -191,6 +229,7 @@ function check(data) {
 // * = 42
 // / = 47
 //(=) = 61
+// Backspace = '\x7F'
 
 // const socket = io('https://nodelink-guxh.onrender.com/');
 // const socket = io('http://localhost:3000');
