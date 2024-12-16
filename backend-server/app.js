@@ -115,7 +115,7 @@ io.on('connection', (socket) => {
     socket.on('term', (data) => {
         console.log(data);
         // io.to(data.id).emit('get', { message: 'message got', id: data.id, number: Math.floor(Math.random() * (100000 - 1) - 1) });
-
+        console.log('wait...')
         request('https://cmpmarketplacebackend.onrender.com/items', function (error, response, body) {
             if (error) {
                 console.error('Error:', error);
