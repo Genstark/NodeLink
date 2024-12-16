@@ -90,20 +90,22 @@ term.onData((e) => {
     }
 
 
-    if (e === '\x1b[C') {
-        if (cursorX < input.length) {
-            cursorX++;
-            term.write('\x1b[C');
-        }
-        console.log('Right Arrow key pressed');
-        return;
-    }
-    else if (e === '\x1b[D') {
-        if (cursorX > 0) {
+    if (e === '\x1b[D') {
+        if (cursorX <= input.length && cursorX > 0) {
             cursorX--;
             term.write('\x1b[D');
+            console.log(cursorX);
         }
         console.log('Left Arrow key pressed');
+        return;
+    }
+    else if (e === '\x1b[C') {
+        if (cursorX < input.length || cursorX === 0) {
+            cursorX++;
+            term.write('\x1b[C');
+            console.log(cursorX);
+        }
+        console.log('Right Arrow key pressed');
         return;
     }
 
@@ -185,12 +187,16 @@ term.onData((e) => {
     else if (e === '\b' || e.charCodeAt(0) === 127) {
         if (input.length > 0) {
             input = input.slice(0, -1);
-            term.write('\b \b');
+            // term.write(`\b \b`);
+            term.write(`\x1b[2K\r$~${input}`);
+            console.log(input.length, input);
+            // input = '';
         }
     }
     else {
         input += e;
         inputlength = input.length;
+        cursorX = input.length;
         term.write(e);
     }
 });
