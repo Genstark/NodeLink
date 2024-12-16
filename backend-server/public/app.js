@@ -28,56 +28,6 @@
 //     }
 // });
 
-
-function check(data) {
-    const arry = data.split(' ');
-    console.log(arry)
-    if (arry[0] === 'calc') {
-        arry.shift();
-        const num1 = arry.join(' ');
-        console.log(num1);
-        try {
-            const result = eval(num1);
-            console.log(result);
-            return result;
-        } catch (error) {
-            console.log('Error in evaluating expression:', error.message);
-        }
-    }
-}
-
-function toServer(userinput) {
-    const data = userinput.split(' ');
-    if (data[0] === 'send') {
-        data.shift();
-        console.log(data);
-        const message = data.join(' ');
-        socket.emit('term', { message: message, id: socket.id });
-    }
-}
-
-//         }
-//     } else if (printable && !(ev.keyCode === 39 && term.buffer.cursorX > curr_line.length + 4)) {
-//         if (ev.keyCode != 37 && ev.keyCode != 39) {
-//             var input = ev.key;
-//             if (ev.keyCode == 9) { // Tab
-//                 input = "    ";
-//             }
-//             pos = curr_line.length - term.buffer.cursorX + 4;
-//             curr_line = [curr_line.slice(0, term.buffer.cursorX - 5), input, curr_line.slice(term.buffer.cursorX - 5)].join('');
-//             term.write('\33[2K\r\u001b[32mscm> \u001b[37m' + curr_line);
-//             term.write('\033['.concat(pos.toString()).concat('D')); //term.write('\033[<N>D');
-//         } else {
-//             term.write(key);
-//         }
-//     }
-// });
-
-// term.on('paste', function(data) {
-//     curr_line += data;
-//     term.write(curr_line);
-// });
-
 const socket = io('https://nodelink-guxh.onrender.com/');
 // const socket = io('http://localhost:3000');
 
