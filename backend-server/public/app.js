@@ -128,6 +128,7 @@ term.onData((e) => {
 
     if (e === '\r' || e === '\n') {
         input = input.trim();
+        console.log(input);
         userCommands.push(input);
         lastcommand = userCommands.length - 1;
 
@@ -165,7 +166,7 @@ term.onData((e) => {
                 socket.on('get', (data) => {
                     console.log(data);
                     const items = data.items.data;
-                    for(let i=0; i < items.length; i++){
+                    for (let i = 0; i < items.length; i++) {
                         term.write(`\n${items[i]._id} ${items[i].user_id}`);
                     }
                     term.write(`\n$~`);
@@ -185,19 +186,27 @@ term.onData((e) => {
         inputlength = 0;
     }
     else if (e === '\b' || e.charCodeAt(0) === 127) {
-        if (input.length > 0) {
-            input = input.slice(0, -1);
-            // term.write(`\b \b`);
+        if (input.length > 0 && cursorX > 0) {
+            input = input.slice(0, cursorX - 1) + input.slice(cursorX);
+            // cursorX--;
             term.write(`\x1b[2K\r$~${input}`);
             console.log(input.length, input);
-            // input = '';
+            console.log(cursorX);
+            cursorX = input.length;
         }
     }
     else {
-        input += e;
-        inputlength = input.length;
-        cursorX = input.length;
-        term.write(e);
+        if (cursorX < input.length) {
+            input = input.slice(0, cursorX) + e + input.slice(cursorX);
+            cursorX = input.length;
+        }
+        else {
+            input += e;
+            cursorX = input.length;
+        }
+        term.write(`\x1b[2K\r$~${input}`);
+        console.log(input, '\x84');
+        console.log(cursorX);
     }
 });
 
