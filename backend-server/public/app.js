@@ -42,6 +42,15 @@ const keyMappings = {
 
 const commands = ['help', 'calc', 'connection', 'clear'];
 let userCommands = []
+let x, y;
+
+term.onCursorMove(() => {
+    const cursorX = term._core.buffer.x;
+    const cursorY = term._core.buffer.y;
+    x = cursorX;
+    y = cursorY;
+    console.log(`Cursor position: (${cursorX}, ${cursorY})`);
+});
 
 term.open(document.getElementById('terminal'));
 term.write('$~');
@@ -55,10 +64,10 @@ let isListenerAdded = false;
 
 term.onData((e) => {
 
-    if (input.length === 0) {
+    if (input.length === 0 && userCommands.length === 0) {
         if (e === '\x1b[C' || e === '\x1b[D' || e === '\x1b[A' || e === '\x1b[B') {
             console.log(`Ignoring ${e} as input is empty.`);
-            // return;
+            return;
         }
     }
 
@@ -179,7 +188,7 @@ term.onData((e) => {
                 term.write(`\n${eval(input)}\n$~`);
             }
             catch {
-                term.write(`\n${input}\n$~`);
+                term.write(`\n${input} invalid\n$~`);
             }
         }
         input = '';
@@ -190,6 +199,7 @@ term.onData((e) => {
             input = input.slice(0, cursorX - 1) + input.slice(cursorX);
             // cursorX--;
             term.write(`\x1b[2K\r$~${input}`);
+            // term.write(`\x1b[${4};${y}H`);
             console.log(input.length, input);
             console.log(cursorX);
             cursorX = input.length;
@@ -205,6 +215,7 @@ term.onData((e) => {
             cursorX = input.length;
         }
         term.write(`\x1b[2K\r$~${input}`);
+        // term.write(`\x1b[3;${y}H`);
         console.log(input, '\x84');
         console.log(cursorX);
     }
