@@ -3,7 +3,6 @@ const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
 const fs = require('fs');
-const request = require('request');
 
 const app = express();
 const server = http.createServer(app);
@@ -110,27 +109,6 @@ io.on('connection', (socket) => {
         } else {
             console.log(`User ${data.targetUsername} not found.`);
         }
-    });
-
-    socket.on('term', (data) => {
-        console.log(data);
-        // io.to(data.id).emit('get', { message: 'message got', id: data.id, number: Math.floor(Math.random() * (100000 - 1) - 1) });
-        console.log('wait...')
-        request('https://cmpmarketplacebackend.onrender.com/items', function (error, response, body) {
-            if (error) {
-                console.error('Error:', error);
-                return;
-            }
-
-            if (response.statusCode === 200) {
-                console.log('Response Body:', body);
-                const items = JSON.parse(body);
-                io.to(data.id).emit('get', { message: 'message got', id: data.id, number: Math.floor(Math.random() * (100000 - 1) - 1), items: items });
-            } else {
-                console.log('Status Code:', response.statusCode);
-            }
-        });
-
     });
 
     socket.on('disconnect', () => {
