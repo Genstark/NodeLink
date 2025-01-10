@@ -11,7 +11,7 @@ const io = socketIo(server, {
 });
 
 
-app.use(express.static(path.resolve(__dirname, 'public'), { 'extensions': ['html', 'css', 'js'] }));
+app.use(express.static(path.resolve(__dirname, 'public'), { 'extensions': ['html', 'css', 'js', 'glb'] }));
 
 app.get('/', (req, res) => {
     res.status(200).sendFile(path.resolve(__dirname, 'public', 'index.html'));
