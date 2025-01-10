@@ -17,6 +17,10 @@ app.get('/', (req, res) => {
     res.status(200).sendFile(path.resolve(__dirname, 'public', 'index.html'));
 });
 
+app.get('/mag', (req, res) => {
+    res.status(200).sendFile(path.resolve(__dirname, 'public', 'data/model-1.glb'));
+});
+
 function base64_encode(file) {
     var bitmap = fs.readFileSync(file);
     return Buffer.from(bitmap).toString('base64');
