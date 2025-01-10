@@ -17,6 +17,7 @@ app.get('/', (req, res) => {
     res.status(200).sendFile(path.resolve(__dirname, 'public', 'index.html'));
 });
 
+//new path
 app.get('/mag', (req, res) => {
     res.status(200).sendFile(path.resolve(__dirname, 'public', 'data/model-1.glb'));
 });
